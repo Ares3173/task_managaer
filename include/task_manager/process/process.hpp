@@ -10,7 +10,6 @@
 #include <filesystem>
 #include <string_view>
 
-
 namespace task_manager {
 class process {
   public:
@@ -127,20 +126,20 @@ class [[nodiscard]] process::suspension {
 
 	suspension& operator=( suspension&& other ) noexcept {
 		if ( this != &other ) {
-			if ( owner_ )
-				( void )owner_->resume_internal(); // best-effort
+			if ( owner_ != nullptr )
+				std::ignore = owner_->resume_internal(); // best-effort
 			owner_ = std::exchange( other.owner_, nullptr );
 		}
 		return *this;
 	}
 
 	~suspension() {
-		if ( owner_ )
-			( void )owner_->resume_internal(); // best-effort, errors swallowed
+		if ( owner_ != nullptr )
+			std::ignore = owner_->resume_internal(); // best-effort, errors swallowed
 	}
 
 	auto resume() -> std::expected<void, errc> {
-		if ( !owner_ )
+		if ( owner_ == nullptr )
 			return std::unexpected{ errc::not_engaged };
 		auto* p = std::exchange( owner_, nullptr );
 		return p->resume_internal();
@@ -166,20 +165,20 @@ class [[nodiscard]] process::frozen {
 
 	frozen& operator=( frozen&& other ) noexcept {
 		if ( this != &other ) {
-			if ( owner_ )
-				( void )owner_->thaw_internal(); // best-effort
+			if ( owner_ != nullptr )
+				std::ignore = owner_->thaw_internal(); // best-effort
 			owner_ = std::exchange( other.owner_, nullptr );
 		}
 		return *this;
 	}
 
 	~frozen() {
-		if ( owner_ )
-			( void )owner_->thaw_internal(); // best-effort, errors swallowed
+		if ( owner_ != nullptr )
+			std::ignore = owner_->thaw_internal(); // best-effort, errors swallowed
 	}
 
 	auto thaw() -> std::expected<void, errc> {
-		if ( !owner_ )
+		if ( owner_ == nullptr )
 			return std::unexpected{ errc::not_engaged };
 		auto* p = std::exchange( owner_, nullptr );
 		return p->thaw_internal();

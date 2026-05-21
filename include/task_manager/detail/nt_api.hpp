@@ -52,6 +52,9 @@ struct object_basic_info {
 	std::uint32_t pointer_count;
 };
 
+auto get_context( void* thread_handle, detail::nt::CONTEXT* ctx ) -> std::expected<void, errc>;
+auto set_context( void* thread_handle, detail::nt::CONTEXT* ctx ) -> std::expected<void, errc>;
+
 auto query_process_basic_info( void* handle ) -> std::expected<process_basic_info, errc>;
 auto query_handle_basic_info( void* handle ) -> std::expected<object_basic_info, errc>;
 

@@ -31,6 +31,9 @@ NTSTATUS NTAPI NtAssignProcessToJobObject( HANDLE JobHandle, HANDLE ProcessHandl
 NTSTATUS NTAPI NtReadVirtualMemory(
     HANDLE ProcessHandle, PVOID BaseAddress, PVOID Buffer, SIZE_T NumberOfBytesToRead,
     PSIZE_T NumberOfBytesRead );
+
+NTSTATUS NTAPI NtGetContextThread( HANDLE ThreadHandle, PCONTEXT ContextRecord );
+NTSTATUS NTAPI NtSetContextThread( HANDLE ThreadHandle, PCONTEXT ContextRecord );
 }
 
 namespace task_manager::detail::nt {
@@ -176,6 +179,22 @@ auto read_virtual_memory( void* handle, address_t addr, std::span<std::byte> dst
 	if ( !NT_SUCCESS( status ) )
 		return std::unexpected{ nt_to_errc( status ) };
 	return static_cast<std::size_t>( bytes_read );
+}
+
+auto get_context( void* thread_handle, detail::nt::CONTEXT* ctx ) -> std::expected<void, errc> {
+	const NTSTATUS status = NtGetContextThread(
+	    static_cast<HANDLE>( thread_handle ), reinterpret_cast<::PCONTEXT>( ctx ) );
+	if ( !NT_SUCCESS( status ) )
+		return std::unexpected{ nt_to_errc( status ) };
+	return {};
+}
+
+auto set_context( void* thread_handle, detail::nt::CONTEXT* ctx ) -> std::expected<void, errc> {
+	const NTSTATUS status = NtSetContextThread(
+	    static_cast<HANDLE>( thread_handle ), reinterpret_cast<::PCONTEXT>( ctx ) );
+	if ( !NT_SUCCESS( status ) )
+		return std::unexpected{ nt_to_errc( status ) };
+	return {};
 }
 
 auto query_handle_basic_info( void* handle ) -> std::expected<object_basic_info, errc> {

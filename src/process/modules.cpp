@@ -16,7 +16,7 @@ bool loaded_module::contains( address_t addr ) const noexcept {
 
 auto loaded_module::read( std::size_t offset, std::span<std::byte> dst ) const
     -> std::expected<std::size_t, errc> {
-	if ( !proc_ || !proc_->handle_ )
+	if ( proc_ == nullptr || !proc_->handle_ )
 		return std::unexpected{ errc::invalid_handle };
 	if ( offset >= size_ )
 		return std::unexpected{ errc::bad_address };

@@ -25,7 +25,7 @@ class unique_handle {
 	}
 
 	~unique_handle() {
-		if ( handle_ )
+		if ( handle_ != nullptr )
 			close( handle_ );
 	}
 
@@ -34,7 +34,7 @@ class unique_handle {
 	[[nodiscard]] native_handle release() noexcept { return std::exchange( handle_, nullptr ); }
 
 	void reset( native_handle h = nullptr ) noexcept {
-		if ( handle_ )
+		if ( handle_ != nullptr )
 			close( handle_ );
 		handle_ = h;
 	}
